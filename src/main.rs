@@ -105,11 +105,17 @@ struct Movement {
 #[derive(Clone)] // For some reason this is required for the route call...
 struct AppState {
     position: Arc<Mutex<Position>>,
+    row_bound: usize,
+    column_bound: usize,
 }
 
 #[tokio::main]
 async fn main() {
-    let app_state = AppState{ position: Arc::new(Mutex::new(Position { row: 5, column: 5})) };
+    let app_state = AppState{ 
+        position: Arc::new(Mutex::new(Position { row: 5, column: 5})),
+        row_bound: 10,
+        column_bound: 10,
+    };
 
     let cors = CorsLayer::new()
         .allow_origin(Any)
@@ -147,5 +153,9 @@ async fn move_position(
         // Movement::RIGHT => position.row -= 1,
         _ => (),
     }
+    if position.row >= state.row_bound { position.row = state.row_bound; }
+    if position.row <= 1 { position.row = 1; }
+    if position.column >= state.column_bound { position.column = state.column_bound; }
+    if position.column <= 1 { position.column = 1; }
     Json(position.clone())
 }
